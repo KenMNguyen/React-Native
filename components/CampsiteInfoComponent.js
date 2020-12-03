@@ -1,5 +1,8 @@
 import React, { Component } from 'react';
-import { Text, View, ScrollView, FlatList, Modal, Button, StyleSheet } from 'react-native';
+import {
+    Text, View, ScrollView, FlatList, Modal, Button,
+    StyleSheet, Alert, PanResponder
+} from 'react-native';
 import { Card, Icon, Input, Rating } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { baseUrl } from '../shared/baseUrl';
@@ -27,8 +30,8 @@ function RenderComments({ comments }) {
                 <Text style={{ fontSize: 14 }}>{item.text}</Text>
                 <Rating
                     startingValue={item.rating}
-                    imageSize= {10}
-                    style= {{alignItems: 'flex-start', paddingVertical: '5%'}}
+                    imageSize={10}
+                    style={{ alignItems: 'flex-start', paddingVertical: '5%' }}
                     readonly
                 />
                 <Text style={{ fontSize: 12 }}>{item.rating} Stars</Text>
@@ -53,9 +56,42 @@ function RenderComments({ comments }) {
 function RenderCampsite(props) {
     const { campsite } = props;
 
+    const recognizeDrag = ({ dx }) => (dx < -200) ? true : false;
+
+    const panResponder = PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onPanResponderEnd: (e, gestureState) => {
+            console.log('pan responder end', gestureState);
+            if (recognizeDrag(gestureState)) {
+                Alert.alert(
+                    'Add Favorite',
+                    'Are you sure you wish to add ' + campsite.name + ' to favorites?',
+                    [
+                        {
+                            text: 'Cancel',
+                            style: 'cancel',
+                            onPress: () => console.log('Cancel Pressed')
+                        },
+                        {
+                            text: 'OK',
+                            onPress: () => props.favorite ?
+                                console.log('Already set as a favorite') : props.markFavorite()
+                        }
+                    ],
+                    { cancelable: false }
+                );
+            }
+            return true;
+        }
+    });
+
     if (campsite) {
         return (
-            <Animatable.View animation='fadeInDown' duration={2000} delay={1000}>
+            <Animatable.View
+                animation='fadeInDown'
+                duration={2000}
+                delay={1000}
+                {...panResponder.panHandlers}>
                 <Card
                     featuredTitle={campsite.name}
                     image={{ uri: baseUrl + campsite.image }}>
@@ -150,25 +186,25 @@ class CampsiteInfo extends Component {
                     <View style={styles.modal}>
                         <Rating
                             showRating
-                            startingValue= {this.state.rating}
-                            imageSize= {40}
+                            startingValue={this.state.rating}
+                            imageSize={40}
                             onFinishRating={rating => this.setState({ rating: rating })}
                             style={{ paddingVertical: 10 }}
                         />
 
                         <Input
-                            placeholder= 'author'
-                            leftIcon = {{ type: 'font-awesome', name: 'user-o' }}
-                            leftIconContainerStyle = {{ paddingRight: 10 }}
-                            onChangeText= {author => this.setState({ author: author })}
-                            value= {this.state.author}
+                            placeholder='author'
+                            leftIcon={{ type: 'font-awesome', name: 'user-o' }}
+                            leftIconContainerStyle={{ paddingRight: 10 }}
+                            onChangeText={author => this.setState({ author: author })}
+                            value={this.state.author}
                         />
                         <Input
-                            placeholder= 'comment'
-                            leftIcon = {{ type: 'font-awesome', name: 'comment-o' }}
-                            leftIconContainerStyle = {{ paddingRight: 10 }}
-                            onChangeText= {text => this.setState({ text: text })}
-                            value= {this.state.text}
+                            placeholder='comment'
+                            leftIcon={{ type: 'font-awesome', name: 'comment-o' }}
+                            leftIconContainerStyle={{ paddingRight: 10 }}
+                            onChangeText={text => this.setState({ text: text })}
+                            value={this.state.text}
                         />
                         <Button
                             onPress={() => {
@@ -217,7 +253,7 @@ const styles = StyleSheet.create({
         color: '#fff',
         marginBottom: 20
     }
-    
+
 });
 
 export default connect(mapStateToProps, mapDispatchToProps)(CampsiteInfo);

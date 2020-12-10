@@ -31,6 +31,7 @@ class Favorites extends Component {
         const renderFavoriteItem = ({ item }) => {
             return (
                 <SwipeRow rightOpenValue={-100} style={styles.swipeRow}>
+                {/* <SwipeRow rightOpenValue={-100} style={styles.swipeRow} closeOnRowPress={true}> */}
                     <View style={styles.deleteView}>
                     <TouchableOpacity
                             style={styles.deleteTouchable}
@@ -43,7 +44,7 @@ class Favorites extends Component {
                                     [
                                         {
                                             text: 'Cancel',
-                                            onPress: () => console.log(item.name + 'Not Deleted'),
+                                            onPress: () => console.log(item.name + ' Not Deleted'),
                                             style: 'cancel'
                                         },
                                         {
